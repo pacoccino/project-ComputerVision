@@ -5,5 +5,9 @@ CONFIG -= qt
 
 LIBS += -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_features2d
 
-SOURCES += src/main.cpp
+SOURCES += src/main.cpp \
+    src/PixelClassifier.cpp
+
+HEADERS += \
+    src/PixelClassifier.h
 
