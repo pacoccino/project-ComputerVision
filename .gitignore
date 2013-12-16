@@ -11,3 +11,10 @@
 *.lai
 *.la
 *.a
+
+# project specific
+*.pro.user
+*.mp4
+*.jpg
+*.png
+*.pdf
