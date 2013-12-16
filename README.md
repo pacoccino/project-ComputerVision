@@ -1,4 +1,4 @@
-project-ComputerVision
+Project Computer Vision
 ======================
 
 Description
