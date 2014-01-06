@@ -13,15 +13,9 @@ using namespace cv;
 string dir = "RhobanVisionLog/log2/";
 string ext = ".png";
 string prefix = "";
-<<<<<<< HEAD
 int start = 3;
 int end = 50;
 int delay = 1000;
-=======
-int start = 129;
-int end = 150;
-int delay = 10000000;
->>>>>>> 58762db09ce9ff888d883a19ac9844f51f4f95e7
 
 KalmanFilter KF(4, 2);
 Point2f prevCenter(-1,-1);
@@ -183,7 +177,7 @@ void process(Mat image) {
     if(pc.detectGoal(goal, goalCenter)) {
         circle(out, goalCenter, 10,Scalar(255,0,0) , 20, 8, 0 );
         cout << "[GOAL] Detected at " << goalCenter << endl;
-        show("Goal", goalOut, offset);
+        show("Goal", out, offset);
 
         pc.positionFromGoal(goal);
     }
