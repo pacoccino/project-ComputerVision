@@ -136,9 +136,6 @@ bool PixelClassifier::detectBall(Point2f &outputCenter, float &outputRadius) {
 
         // // for debugging display :
         //circle(ballTresh, outputCenter, (int)outputRadius,Scalar(255,255,255) , 2, 8, 0 );
-
-
-//        circle(out, outputCenter, (int)outputRadius * 3,Scalar(0,0,255) , 2, 8, 0 );
     }
     return ballVisible;
 }
@@ -222,7 +219,7 @@ void PixelClassifier::filterOutOfTerrain() {
         }
     }
 
-    imshow("Before filter", thresh);
+//    imshow("Before filter", thresh);
 
     int an;
     Mat element;
@@ -231,17 +228,17 @@ void PixelClassifier::filterOutOfTerrain() {
     an=2;
     element = getStructuringElement(cv::MORPH_ELLIPSE, Size(an*2+1, an*2+1), Point(an, an) );
     erode(thresh, thresh, element);
-    imshow("After erode", thresh);
+//    imshow("After erode", thresh);
 
     // Extraction de la composante connexe de surface la plus grande
     extractBiggestConnectedComposant(thresh, thresh);
-    imshow("After Connected Composant", thresh);
+//    imshow("After Connected Composant", thresh);
 
     // dilate
     an=5;
     element = getStructuringElement(cv::MORPH_ELLIPSE, Size(an*2+1, an*2+1), Point(an, an) );
     dilate(thresh, thresh, element);
-    imshow("After dilatation", thresh);
+//    imshow("After dilatation", thresh);
 
 
     // filtrage
@@ -252,3 +249,4 @@ void PixelClassifier::filterOutOfTerrain() {
         }
     }
 }
+

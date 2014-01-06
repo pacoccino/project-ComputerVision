@@ -16,7 +16,19 @@ int start = 0;
 int end = 341;
 int delay = 10000000;
 
+void fetchImages();
+void process(Mat);
+
 int main() {
+
+    fetchImages();
+
+
+    return 0;
+}
+
+void fetchImages() {
+
     struct timeval startTime, endTime;
 
     for (int i = start; i <= end; ++i) {
@@ -33,17 +45,8 @@ int main() {
             cout << "Unable to load image" << endl;
             continue;
         }
-        imshow("Base image", image);
 
-        // Processing
-        PixelClassifier pc;
-        Mat imageNew;
-        pc.setImage(image);
-        pc.filterOutOfTerrain();
-
-        //pc.detectBall();
-
-        pc.generateImageFromClass(imageNew);
+        process(image);
 
         // Result
         gettimeofday(&endTime, NULL);
@@ -52,16 +55,43 @@ int main() {
                 (endTime.tv_usec - startTime.tv_usec) / 1000
              << " ms" << endl;
 
-        imshow("Result Image", imageNew);
-
-        if (waitKey(delay) == 27) { // == ESC
+        char k = (unsigned int)cvWaitKey(delay);
+        if (k == 27) { // == ESC
             break;
         }
     }
-
-    return 0;
 }
 
+void process(Mat image) {
+    PixelClassifier pc;
+    pc.setImage(image);
+
+    //
+    imshow("Base image", image);
+
+
+    // * * * * Filter Terrain * * * * //
+    pc.filterOutOfTerrain();
+    Mat imageOut;
+    pc.generateImageFromClass(imageOut);
+    imshow("Filtered Terrain", imageOut);
+
+    // * * * * BALL * * * * //
+    Mat ballOut = image.clone();
+    Point2f center; float radius;
+    bool isBallVisible = pc.detectBall(center, radius);
+    if (isBallVisible){
+        cout << "[BALL] Detected at " << center << " of radius " << radius << endl;
+        circle(ballOut, center, (int)radius * 3,Scalar(0,0,255) , 2, 8, 0 );
+        imshow ("ball", ballOut);
+    }else{
+        cout << "[BALL] Not detected" << endl;
+    }
+
+    // * * * * GOAL * * * * //
+    //pc.detectGoal();
+
+}
 
 int test() {
     Mat src, dst;
