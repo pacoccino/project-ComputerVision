@@ -3,6 +3,7 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include <opencv2/video/tracking.hpp>
 
 #include "PixelClassifier.h"
 
@@ -16,16 +17,75 @@ int start = 3;
 int end = 50;
 int delay = 10000000;
 
+KalmanFilter KF(4, 2);
+Point2f prevCenter(-1,-1);
 
+void initKalmanInterpolation();
+void KalmanInterpolation(Point2f center, bool isBallVisible, Mat out);
 void fetchImages();
 void process(Mat);
 
 int main() {
 
+    initKalmanInterpolation();
+
     fetchImages();
 
 
     return 0;
+}
+
+void initKalmanInterpolation(){
+
+    // * * * * video tracking * * * * //
+    setIdentity(KF.processNoiseCov, Scalar::all(1));
+    setIdentity(KF.measurementNoiseCov, Scalar::all(1));
+    // setIdentity(KF.errorCovPost, Scalar::all(1));
+
+    setIdentity(KF.transitionMatrix);
+    KF.transitionMatrix.at<float>(0,2) = 1;
+    KF.transitionMatrix.at<float>(1,3) = 1;
+}
+
+void KalmanInterpolation(Point2f center, bool isBallVisible, Mat out){
+    if (prevCenter.x < 0){
+        if (isBallVisible){
+            KF.measurementMatrix = (Mat_<float>(2, 4) << 1, 0, 0, 0,
+                                    0, 1, 0, 0);
+
+            KF.statePost.at<float>(0,0) = center.x;
+            KF.statePost.at<float>(1,0) = center.y;
+            KF.statePost.at<float>(2,0) = 0;
+            KF.statePost.at<float>(3,0) = 0;
+            prevCenter = center;
+        }
+    }else{
+        setIdentity(KF.measurementNoiseCov, Scalar::all(10));
+
+        Mat prediction;
+        prediction = KF.predict();
+
+        Mat observations_m(2,1, CV_32F);
+
+        if (isBallVisible){
+            observations_m.at<float>(0,0) = center.x;
+            observations_m.at<float>(1,0) = center.y;
+            prevCenter = center;
+        }else{
+            observations_m.at<float>(0,0) = prevCenter.x;
+            observations_m.at<float>(1,0) = prevCenter.y;
+        }
+
+        Mat state(4,1, CV_32F);
+
+        state = KF.correct(observations_m);
+
+        Point po;
+        po.x = state.at<float>(0,0);
+        po.y = state.at<float>(1,0);
+
+        circle(out, po, (int)8,Scalar(0,255,0) , 4, 8, 0 );
+    }
 }
 
 void fetchImages() {
@@ -104,6 +164,10 @@ void process(Mat image) {
         cout << "[BALL] Not detected" << endl;
         destroyWindow("ball");
     }
+
+    // Video Tracking
+    KalmanInterpolation(center, isBallVisible, out);
+
 
     // * * * * GOAL * * * * //
     vector<Point> goal;
