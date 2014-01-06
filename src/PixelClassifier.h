@@ -36,6 +36,7 @@ public:
     bool detectBall(Point2f &outputCenter, float &outputRadius);
     void filterGoal(Mat &dest);
     void preprocess();
+    void positionFromGoal(vector<Point> goal);
 };
 
 #endif // PIXELCLASSIFIER_H

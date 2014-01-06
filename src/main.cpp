@@ -12,8 +12,8 @@ using namespace cv;
 string dir = "RhobanVisionLog/log2/";
 string ext = ".png";
 string prefix = "";
-int start = 3;
-int end = 50;
+int start = 129;
+int end = 150;
 int delay = 10000000;
 
 
@@ -44,6 +44,7 @@ void fetchImages() {
         image = imread(file);
         if(image.data == NULL) {
             cout << "Unable to load image" << endl;
+            i++;
             continue;
         }
 
@@ -108,12 +109,15 @@ void process(Mat image) {
     Mat goalOut = image.clone();
     vector<Point> goal;
     Point goalCenter;
+
     if(pc.detectGoal(goal, goalCenter)) {
         circle(goalOut, goalCenter, 1 * 3,Scalar(0,255) , 2, 8, 0 );
         cout << "[GOAL] Detected at " << goalCenter << endl;
         show("Goal", goalOut, offset);
+
+        pc.positionFromGoal(goal);
     }
     else {
-        cout << "Goal not detected";
+        cout << "Goal not detected" << endl;
     }
 }
