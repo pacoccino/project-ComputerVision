@@ -102,6 +102,7 @@ void process(Mat image) {
         show ("ball", ballOut, offset);
     }else{
         cout << "[BALL] Not detected" << endl;
+        destroyWindow("ball");
     }
 
     // * * * * GOAL * * * * //
@@ -112,6 +113,8 @@ void process(Mat image) {
         circle(goalOut, goalCenter, 1 * 3,Scalar(0,255) , 2, 8, 0 );
         cout << "[GOAL] Detected at " << goalCenter << endl;
         show("Goal", goalOut, offset);
+    } else {
+        destroyWindow("Goal");
     }
     else {
         cout << "Goal not detected";
