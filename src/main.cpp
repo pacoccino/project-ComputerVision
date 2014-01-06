@@ -16,7 +16,19 @@ int start = 0;
 int end = 341;
 int delay = 10000000;
 
+void fetchImages();
+void process(Mat);
+
 int main() {
+
+    fetchImages();
+
+
+    return 0;
+}
+
+void fetchImages() {
+
     struct timeval startTime, endTime;
 
     for (int i = start; i <= end; ++i) {
@@ -35,14 +47,7 @@ int main() {
         }
         imshow("Base image", image);
 
-        // Processing
-        PixelClassifier pc;
-        Mat imageNew;
-        pc.setImage(image);
-        pc.filterOutOfTerrain();
-        //pc.detectBall();
-
-        pc.generateImageFromClass(imageNew);
+        process(image);
 
         // Result
         gettimeofday(&endTime, NULL);
@@ -51,16 +56,26 @@ int main() {
                 (endTime.tv_usec - startTime.tv_usec) / 1000
              << " ms" << endl;
 
-        imshow("Result Image", imageNew);
-
         if (waitKey(delay) == 27) { // == ESC
             break;
         }
     }
-
-    return 0;
 }
 
+void process(Mat image) {
+    // Processing
+    PixelClassifier pc;
+    Mat imageNew;
+    pc.setImage(image);
+
+    pc.detectGoal();
+    pc.detectBall();
+
+    pc.generateImageFromClass(imageNew);
+
+
+    imshow("Result", imageNew);
+}
 
 int test() {
     Mat src, dst;
