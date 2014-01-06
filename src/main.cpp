@@ -91,29 +91,30 @@ void process(Mat image) {
     show("Filtered Terrain", imageOut, offset);
 
 
+    // common result image
+    Mat out = image.clone();
 
     // * * * * BALL * * * * //
-    Mat ballOut = image.clone();
     Point2f center; float radius;
     bool isBallVisible = pc.detectBall(center, radius);
     if (isBallVisible){
         cout << "[BALL] Detected at " << center << " of radius " << radius << endl;
-        circle(ballOut, center, (int)radius * 3,Scalar(0,0,255) , 2, 8, 0 );
-        show ("ball", ballOut, offset);
+        circle(out, center, (int)radius * 3,Scalar(0,0,255) , 4, 8, 0 );
     }else{
         cout << "[BALL] Not detected" << endl;
     }
 
     // * * * * GOAL * * * * //
-    Mat goalOut = image.clone();
     vector<Point> goal;
     Point goalCenter;
     if(pc.detectGoal(goal, goalCenter)) {
-        circle(goalOut, goalCenter, 1 * 3,Scalar(0,255) , 2, 8, 0 );
+        circle(out, goalCenter, 10,Scalar(255,0,0) , 20, 8, 0 );
         cout << "[GOAL] Detected at " << goalCenter << endl;
-        show("Goal", goalOut, offset);
+    } else {
+        cout << "[GOAL] Not detected";
     }
-    else {
-        cout << "Goal not detected";
-    }
+
+    // output image
+    show ("Result", out, offset);
+
 }
