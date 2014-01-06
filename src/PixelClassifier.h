@@ -22,14 +22,19 @@ class PixelClassifier
     PixelClass getClass(uchar hue, uchar saturation, uchar value);
     bool isInRange(char source, char dest, char range = 10);
     void setColorFromClass(Vec3b &dest, char src);
+
 public:
     PixelClassifier();
-    void computeMatrix();
     void setImage(const Mat &image);
+    void computeMatrix();
     void generateImageFromClass(Mat &dest);
-    void filterOutOfTerrain();
+
     void getOneClass(Mat &dest, PixelClass cl);
+
+    void filterOutOfTerrain();
     void detectGoal();
+    void detectBall();
+    std::vector<cv::Point> *extractBiggestConnectedComposant(Mat source, Mat dest);
 };
 
 #endif // PIXELCLASSIFIER_H
