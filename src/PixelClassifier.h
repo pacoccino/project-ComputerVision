@@ -29,7 +29,7 @@ public:
     void getOneClass(Mat &dest, PixelClass cl);
     void detectGoal();
     void detectBall();
-    void extractBiggestConnectedComposant(Mat source, Mat dest);
+    std::vector<cv::Point> *extractBiggestConnectedComposant(Mat source, Mat dest);
 };
 
 #endif // PIXELCLASSIFIER_H

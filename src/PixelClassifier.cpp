@@ -15,10 +15,10 @@ void PixelClassifier::setImage(const Mat &image) {
 
 bool PixelClassifier::isInRange(char source, char dest, char range) {
     // tells if a value is around another value
-    int largeSource = source + 255;
-    int largeDest = dest + 255;
+    int largeSource = source;
+    int largeDest = dest;
 
-    if( (largeDest - range) < largeSource && largeSource < (largeDest + range) )
+    if(largeDest < (largeSource + range)%180 && largeSource < (largeDest + range)%180 )
         return true;
     return false;
 }
@@ -119,8 +119,24 @@ void PixelClassifier::detectBall() {
     Mat ballTresh;
     getOneClass(ballTresh, BALLE);
 
-    erode(ballTresh, ballTresh, NULL);
-    dilate(ballTresh, ballTresh, NULL);
+
+    vector< Point > *contour;
+    contour = extractBiggestConnectedComposant(ballTresh, ballTresh);
+
+    if (contour != NULL){
+        vector<Point> poly;
+        Point2f center;
+        float radius;
+
+        approxPolyDP( Mat(*contour), poly, 3, true );
+        minEnclosingCircle( (Mat)poly, center, radius);
+        circle(ballTresh, center, (int)radius,Scalar(255,0,0) , 2, 8, 0 );
+
+        cout << "Ball at " << center << " of radius " << radius << "\n";
+    }else{
+        cout << "Ball not detected\n";
+        //TODO
+    }
 
     imshow("Ball", ballTresh);
 
@@ -172,7 +188,7 @@ void PixelClassifier::detectGoal() {
     waitKey();
 }
 
-void PixelClassifier::extractBiggestConnectedComposant(Mat source, Mat dest){
+std::vector< cv::Point > *PixelClassifier::extractBiggestConnectedComposant(Mat source, Mat dest){
     Mat img = source.clone();
     //Mat out = source.clone();
     std::vector<std::vector<cv::Point> > contours;
@@ -188,11 +204,17 @@ void PixelClassifier::extractBiggestConnectedComposant(Mat source, Mat dest){
             id = i;
         }
     }
+
     if (id>=0){
         dest.setTo(0);
         drawContours(dest, contours, id, Scalar(255), CV_FILLED);
+
+        vector< Point > *out = new vector< Point >();
+        *out = contours[id];
+        return out;
     }
-    //dest = out.clone();
+
+    return NULL;
 }
 
 void PixelClassifier::filterOutOfTerrain() {
