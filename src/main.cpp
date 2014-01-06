@@ -31,7 +31,7 @@ void fetchImages() {
 
     struct timeval startTime, endTime;
 
-    for (int i = start; i <= end; ++i) {
+    for (int i = start; i <= end;) {
         stringstream ss;
         ss << dir << prefix << i << ext;
         string file = ss.str();
@@ -58,6 +58,12 @@ void fetchImages() {
         char k = (unsigned int)cvWaitKey(delay);
         if (k == 27) { // == ESC
             break;
+        }else if(k == 81){ // <--
+            if (i - 1 < start)
+                continue;
+            --i;
+        }else{
+            ++i;
         }
     }
 }
@@ -92,6 +98,7 @@ void process(Mat image) {
     vector<Point> goal;
     Point goalCenter;
     pc.detectGoal(goal, goalCenter);
+
 
 
 }
