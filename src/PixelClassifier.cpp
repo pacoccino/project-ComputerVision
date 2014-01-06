@@ -128,30 +128,48 @@ void PixelClassifier::detectGoal() {
     element = getStructuringElement(cv::MORPH_ELLIPSE, Size(an*2+1, an*2+1), Point(an, an) );
     dilate(goalThresh, goalThresh, element);
 
-    namedWindow("Goal");
-    imshow("Goal", goalThresh);
 
-
-    Mat edges;
+    Mat edges,lignes;
     Canny(goalThresh, edges, 66.0, 133.0, 3);
 
-    vector<Vec2f> lines;
-    HoughLines( edges, lines, 1, CV_PI/180, 50, 0, 0 );
-    cout << lines.size() << endl;
+    namedWindow("Goal");
+    imshow("Goal", edges);
 
-    Mat lignes(classMat.rows, classMat.cols, CV_8UC3);
+    vector<Vec4i> lines;
+    HoughLinesP(goalThresh, lines, 1, CV_PI/180, 40, 70, 10 );
+
+    cout << "Nombre de lognes : " << lines.size() << endl;
+    lignes.create(classMat.rows, classMat.cols, CV_8UC3);
+    lignes.setTo(Scalar(0,0,0));
+    vector<Point> points;
     for( size_t i = 0; i < lines.size(); i++ )
     {
-         float rho = lines[i][0], theta = lines[i][1];
-         Point pt1, pt2;
-         double a = cos(theta), b = sin(theta);
-         double x0 = a*rho, y0 = b*rho;
-         pt1.x = cvRound(x0 + 1000*(-b));
-         pt1.y = cvRound(y0 + 1000*(a));
-         pt2.x = cvRound(x0 - 1000*(-b));
-         pt2.y = cvRound(y0 - 1000*(a));
-         line( lignes, pt1, pt2, Scalar(0,0,255), 1, CV_AA);
+        Vec4i l = lines[i];
+        //line( lignes, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(0,0,255), 3, CV_AA);
+        Point p;
+        p.x = l[0];
+        p.y = l[1];
+        points.push_back(p);
+
+        p.x = l[2];
+        p.y= l[3];
+        points.push_back(p);
     }
+
+    for( size_t i = 0; i < points.size(); i++ )
+    {
+        circle(lignes, points[i], 2, Scalar(255,0,0), 2);
+    }
+
+    int election;
+    election = Tools::getNearerPoint(points, Point(0,0));
+    circle(lignes, points[election], 2, Scalar(0,0,255), 2);
+    election = Tools::getNearerPoint(points, Point(classMat.cols,0));
+    circle(lignes, points[election], 2, Scalar(0,0,255), 2);
+    election = Tools::getNearerPoint(points, Point(0,classMat.rows));
+    circle(lignes, points[election], 2, Scalar(0,0,255), 2);
+    election = Tools::getNearerPoint(points, Point(classMat.cols,classMat.rows));
+    circle(lignes, points[election], 2, Scalar(0,0,255), 2);
 
     namedWindow("lignes");
     imshow("lignes", lignes);

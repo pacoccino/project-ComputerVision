@@ -6,6 +6,8 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <iostream>
 
+#include "Tools.h"
+
 using namespace cv;
 using namespace std;
 
