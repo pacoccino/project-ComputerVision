@@ -2,6 +2,8 @@
 #define PIXELCLASSIFIER_H
 
 #include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 #include <iostream>
 
 using namespace cv;
@@ -23,6 +25,7 @@ public:
     void computeMatrix();
     void setImage(const Mat &image);
     void generateImageFromClass(Mat &dest);
+    void filterOutOfTerrain();
 };
 
 #endif // PIXELCLASSIFIER_H

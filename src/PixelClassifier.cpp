@@ -97,3 +97,58 @@ void PixelClassifier::generateImageFromClass(Mat &dest) {
         }
     }
 }
+
+void PixelClassifier::filterOutOfTerrain() {
+    Mat thresh(classMat.rows, classMat.cols, CV_8UC1);
+
+    for(int x=0; x<thresh.cols; x++) {
+        for(int y=0; y<thresh.rows; y++) {
+            if(classMat.at<uchar>(y,x) ==  TERRAIN)
+                thresh.at<uchar>(y,x) = 255;
+            else
+                thresh.at<uchar>(y,x) = 0;
+        }
+    }
+
+    namedWindow("coucoua");
+    dilate(thresh, thresh, Mat(), Point(-1,-1), 2);
+
+    imshow("coucoua", thresh);
+
+    Mat edges;
+    Canny(thresh, edges, 66.0, 133.0, 3);
+
+    dilate(edges, edges, Mat(), Point(-1,-1));
+    namedWindow("coucou");
+    imshow("coucou", edges);
+
+    vector<Vec2f> lines;
+    HoughLines( edges, lines, 1, CV_PI/180, 50, 0, 0 );
+    cout << lines.size() << endl;
+
+    Mat lignes(classMat.rows, classMat.cols, CV_8UC3);
+    for( size_t i = 0; i < lines.size(); i++ )
+    {
+         float rho = lines[i][0], theta = lines[i][1];
+         Point pt1, pt2;
+         double a = cos(theta), b = sin(theta);
+         double x0 = a*rho, y0 = b*rho;
+         pt1.x = cvRound(x0 + 1000*(-b));
+         pt1.y = cvRound(y0 + 1000*(a));
+         pt2.x = cvRound(x0 - 1000*(-b));
+         pt2.y = cvRound(y0 - 1000*(a));
+         line( lignes, pt1, pt2, Scalar(0,0,255), 1, CV_AA);
+    }
+
+    namedWindow("lignes");
+    imshow("lignes", lignes);
+/*
+    for(int x=0; x<thresh.cols; x++) {
+        for(int y=0; y<thresh.rows; y++) {
+            if(thresh.at<uchar>(y,x) == 0 && classMat.at<uchar>(y,x) != BUT)
+                classMat.at<uchar>(y,x) = POUBELLE;
+        }
+    }
+*/
+
+}
