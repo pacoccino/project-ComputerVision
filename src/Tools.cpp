@@ -1,8 +1,8 @@
 #include "Tools.h"
 
-Tools::Tools()
-{
-}
+using namespace cv;
+using namespace std;
+using namespace Tools;
 
 float Tools::distance(Point p1, Point p2) {
     float dist;
@@ -26,4 +26,34 @@ int Tools::getNearestPoint(vector<Point> list, Point p) {
     }
 
     return election;
+}
+
+
+std::vector< cv::Point > *Tools::extractBiggestConnectedComposant(Mat source, Mat dest){
+    //Mat img = source.clone();
+    //Mat out = source.clone();
+    std::vector<std::vector<cv::Point> > contours;
+    std::vector<cv::Vec4i> hierarchy;
+    cv::findContours(source, contours, hierarchy, cv::RETR_CCOMP, cv::CHAIN_APPROX_TC89_KCOS);
+    int id = -1;
+    float area = 0;
+    for ( size_t i=0; i < contours.size(); ++i )
+    {
+        float currentArea = contourArea(contours.at(i));
+        if (currentArea > area){
+            area = currentArea;
+            id = i;
+        }
+    }
+
+    dest.setTo(0);
+    if (id>=0){
+        drawContours(dest, contours, id, Scalar(255), CV_FILLED);
+
+        vector< Point > *out = new vector< Point >();
+        *out = contours[id];
+        return out;
+    }
+
+    return NULL;
 }

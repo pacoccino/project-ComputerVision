@@ -9,7 +9,7 @@
 using namespace std;
 using namespace cv;
 
-string dir = "RhobanVisionLog/log8/";
+string dir = "RhobanVisionLog/log2/";
 string ext = ".png";
 string prefix = "";
 int start = 3;
@@ -45,7 +45,6 @@ void fetchImages() {
             cout << "Unable to load image" << endl;
             continue;
         }
-        imshow("Base image", image);
 
         process(image);
 
@@ -56,27 +55,51 @@ void fetchImages() {
                 (endTime.tv_usec - startTime.tv_usec) / 1000
              << " ms" << endl;
 
-        if (waitKey(delay) == 27) { // == ESC
+        char k = (unsigned int)cvWaitKey(delay);
+        if (k == 27) { // == ESC
             break;
         }
     }
 }
 
 void process(Mat image) {
-    // Processing
     PixelClassifier pc;
-    Mat imageNew;
     pc.setImage(image);
+
+    // * * * * base image * * * * //
+    imshow("Base image", image);
+
+
+    // * * * * Filter Terrain * * * * //
+    Mat imageOut;
+    pc.generateImageFromClass(imageOut);
+    imshow("Filtered Terrain", imageOut);
+
+
+    Mat descOut = image.clone();
+    descOut.setTo(Scalar(0,0,0));
+
+    // * * * * BALL * * * * //
+    Point2f center; float radius;
+    bool isBallVisible = pc.detectBall(center, radius);
+    if (isBallVisible){
+        cout << "[BALL] Detected at " << center << " of radius " << radius << endl;
+        circle(descOut, center, (int)radius * 3,Scalar(0,0,255) , 2, 8, 0 );
+    }else{
+        cout << "[BALL] Not detected" << endl;
+    }
+
+    // * * * * GOAL * * * * //
     vector<Point> goal;
     Point goalCenter;
-    /*pc.detectGoal(goal, goalCenter);
-    pc.detectBall();*/
-    pc.filterOutOfTerrain();
-
-    pc.generateImageFromClass(imageNew);
-
-
-    imshow("Result", imageNew);
+    if(pc.detectGoal(goal, goalCenter)) {
+        circle(descOut, goalCenter, 1 * 3,Scalar(0,255) , 2, 8, 0 );
+        cout << "[GOAL] Detected at " << goalCenter << endl;
+    }
+    else {
+        cout << "Goal not detected";
+    }
+    imshow("Schema out", descOut);
 }
 
 int test() {
