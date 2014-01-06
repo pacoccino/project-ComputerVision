@@ -162,6 +162,7 @@ bool PixelClassifier::detectGoal(vector<Point> &goalCorners, Point &center) {
     Mat goalThresh;
     getOneClass(goalThresh, BUT);
 
+
     int an;
     Mat element;
     an=2;
@@ -190,10 +191,15 @@ bool PixelClassifier::detectGoal(vector<Point> &goalCorners, Point &center) {
             p.y= l[3];
             points.push_back(p);
         }
-
-
-        Moments mom = moments(points);
-        center = Point(mom.m10/mom.m00, mom.m01/mom.m00);
+        int sumx=0, sumy=0, nb=0;
+        for(size_t i = 0; i<points.size(); i++)  {
+            sumx += points[i].x;
+            sumy += points[i].y;
+            nb++;
+        }
+        //Moments mom = moments(points);
+        //center = Point(mom.m10/mom.m00, mom.m01/mom.m00);
+        center = Point(sumx/(float)nb, sumy/(float)nb);
 
         int election;
 
@@ -207,11 +213,10 @@ bool PixelClassifier::detectGoal(vector<Point> &goalCorners, Point &center) {
         goalCorners.push_back(points[election]);
         return true;
     }
+
+    cout << "nin" << endl;
     return false;
-
 }
-
-
 
 void PixelClassifier::filterOutOfTerrain(Mat &dest) {
     Mat thresh;
@@ -274,4 +279,19 @@ void PixelClassifier::filterGoal(Mat &dest) {
     }
     /*Mat element = getStructuringElement(cv::MORPH_ELLIPSE, Size(2, 2));
     dilate(goalThresh, goalThresh, element);*/
+}
+
+void PixelClassifier::positionFromGoal(vector<Point> goal) {
+    float leftHeight, rightHeight;
+    leftHeight = Tools::distance(goal[0], goal[1]);
+    rightHeight = Tools::distance(goal[2], goal[3]);
+
+    float ecart = abs(leftHeight - rightHeight);
+    cout << ecart << endl;
+    if(leftHeight < rightHeight && ecart > 5) {
+        cout << "Robot is in the right part of the terrain" << endl;
+    }
+    else {
+        cout << "Robot is in the left part of the terrain" << endl;
+    }
 }

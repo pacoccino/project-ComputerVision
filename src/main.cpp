@@ -13,9 +13,15 @@ using namespace cv;
 string dir = "RhobanVisionLog/log2/";
 string ext = ".png";
 string prefix = "";
+<<<<<<< HEAD
 int start = 3;
 int end = 50;
 int delay = 1000;
+=======
+int start = 129;
+int end = 150;
+int delay = 10000000;
+>>>>>>> 58762db09ce9ff888d883a19ac9844f51f4f95e7
 
 KalmanFilter KF(4, 2);
 Point2f prevCenter(-1,-1);
@@ -104,6 +110,7 @@ void fetchImages() {
         image = imread(file);
         if(image.data == NULL) {
             cout << "Unable to load image" << endl;
+            i++;
             continue;
         }
 
@@ -172,11 +179,16 @@ void process(Mat image) {
     // * * * * GOAL * * * * //
     vector<Point> goal;
     Point goalCenter;
+
     if(pc.detectGoal(goal, goalCenter)) {
         circle(out, goalCenter, 10,Scalar(255,0,0) , 20, 8, 0 );
         cout << "[GOAL] Detected at " << goalCenter << endl;
-    } else {
-        cout << "[GOAL] Not detected";
+        show("Goal", goalOut, offset);
+
+        pc.positionFromGoal(goal);
+    }
+    else {
+        cout << "Goal not detected" << endl;
     }
 
     // output image
