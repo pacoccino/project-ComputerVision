@@ -102,6 +102,7 @@ void process(Mat image) {
         circle(out, center, (int)radius * 3,Scalar(0,0,255) , 4, 8, 0 );
     }else{
         cout << "[BALL] Not detected" << endl;
+        destroyWindow("ball");
     }
 
     // * * * * GOAL * * * * //
