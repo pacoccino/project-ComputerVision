@@ -9,7 +9,7 @@
 using namespace std;
 using namespace cv;
 
-string dir = "RhobanVisionLog/log8/";
+string dir = "RhobanVisionLog/log2/";
 string ext = ".png";
 string prefix = "";
 int start = 0;
@@ -40,6 +40,7 @@ int main() {
         Mat imageNew;
         pc.setImage(image);
         pc.filterOutOfTerrain();
+
         //pc.detectBall();
 
         pc.generateImageFromClass(imageNew);

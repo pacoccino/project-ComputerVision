@@ -44,7 +44,7 @@ void PixelClassifier::generateImageFromClass(Mat &dest) {
 }
 
 bool PixelClassifier::isInRange(char source, char dest, char range) {
-    // tells if a value is around another value
+    // tells if a value is around another value mod 180
     int largeSource = source;
     int largeDest = dest;
 
@@ -114,8 +114,8 @@ void PixelClassifier::getOneClass(Mat &dest, PixelClass cl) {
 }
 
 
-// WARNING! Must filter terrain out
-void PixelClassifier::detectBall() {
+// WARNING! Must filter terrain out before
+bool PixelClassifier::detectBall(Point2f &outputCenter, float &outputRadius) {
     Mat ballTresh;
     getOneClass(ballTresh, BALLE);
 
@@ -124,27 +124,23 @@ void PixelClassifier::detectBall() {
     vector< Point > *contour;
     contour = extractBiggestConnectedComposant(ballTresh, ballTresh);
 
-    if (contour != NULL){
+    outputCenter = Point2f(-1,-1);
+    outputRadius = -1;
+
+    bool ballVisible = (contour != NULL);
+    if (ballVisible){
         vector<Point> poly;
-        Point2f center;
-        float radius;
 
         approxPolyDP( Mat(*contour), poly, 3, true );
-        minEnclosingCircle( (Mat)poly, center, radius);
-        circle(ballTresh, center, (int)radius,Scalar(255,255,255) , 2, 8, 0 );
+        minEnclosingCircle( (Mat)poly, outputCenter, outputRadius);
+
+        // // for debugging display :
+        //circle(ballTresh, outputCenter, (int)outputRadius,Scalar(255,255,255) , 2, 8, 0 );
 
 
-        circle(out, center, (int)radius * 3,Scalar(0,0,255) , 2, 8, 0 );
-
-        cout << "Ball at " << center << " of radius " << radius << "\n";
-    }else{
-        cout << "Ball not detected\n";
+//        circle(out, outputCenter, (int)outputRadius * 3,Scalar(0,0,255) , 2, 8, 0 );
     }
-
-
-
-    imshow("Ball", out);
-
+    return ballVisible;
 }
 
 void PixelClassifier::detectGoal() {
@@ -211,34 +207,7 @@ void PixelClassifier::detectGoal() {
     waitKey();
 }
 
-std::vector< cv::Point > *PixelClassifier::extractBiggestConnectedComposant(Mat source, Mat dest){
-    //Mat img = source.clone();
-    //Mat out = source.clone();
-    std::vector<std::vector<cv::Point> > contours;
-    std::vector<cv::Vec4i> hierarchy;
-    cv::findContours(source, contours, hierarchy, cv::RETR_CCOMP, cv::CHAIN_APPROX_TC89_KCOS);
-    int id = -1;
-    float area = 0;
-    for ( size_t i=0; i < contours.size(); ++i )
-    {
-        float currentArea = contourArea(contours.at(i));
-        if (currentArea > area){
-            area = currentArea;
-            id = i;
-        }
-    }
 
-    dest.setTo(0);
-    if (id>=0){
-        drawContours(dest, contours, id, Scalar(255), CV_FILLED);
-
-        vector< Point > *out = new vector< Point >();
-        *out = contours[id];
-        return out;
-    }
-
-    return NULL;
-}
 
 void PixelClassifier::filterOutOfTerrain() {
     Mat thresh;

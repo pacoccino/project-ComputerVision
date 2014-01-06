@@ -10,6 +10,7 @@
 
 using namespace cv;
 using namespace std;
+using namespace Tools;
 
 enum PixelClass { BUT, BALLE, LIGNE, TERRAIN, POUBELLE };
 
@@ -33,8 +34,7 @@ public:
 
     void filterOutOfTerrain();
     void detectGoal();
-    void detectBall();
-    std::vector<cv::Point> *extractBiggestConnectedComposant(Mat source, Mat dest);
+    bool detectBall(Point2f &outputCenter, float &outputRadius);
 };
 
 #endif // PIXELCLASSIFIER_H
