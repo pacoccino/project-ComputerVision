@@ -15,10 +15,10 @@ void PixelClassifier::setImage(const Mat &image) {
 
 bool PixelClassifier::isInRange(char source, char dest, char range) {
     // tells if a value is around another value
-    int largeSource = source + 255;
-    int largeDest = dest + 255;
+    int largeSource = source;
+    int largeDest = dest;
 
-    if( (largeDest - range) < largeSource && largeSource < (largeDest + range) )
+    if(largeDest < (largeSource + range)%180 && largeSource < (largeDest + range)%180 )
         return true;
     return false;
 }
