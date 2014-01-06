@@ -31,9 +31,8 @@ public:
     void generateImageFromClass(Mat &dest);
 
     void getOneClass(Mat &dest, PixelClass cl);
-
     void filterOutOfTerrain();
-    void detectGoal();
+    bool detectGoal(vector<Point> &goalCorners, Point &center);
     bool detectBall(Point2f &outputCenter, float &outputRadius);
 };
 

@@ -9,7 +9,7 @@
 namespace Tools
 {
     float distance(cv::Point p1, cv::Point p2);
-    int getNearerPoint(std::vector<cv::Point> list, cv::Point p);
+    int getNearestPoint(std::vector<cv::Point> list, cv::Point p);
     std::vector<cv::Point> *extractBiggestConnectedComposant(cv::Mat source, cv::Mat dest);
 };
 

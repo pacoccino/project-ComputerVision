@@ -12,8 +12,8 @@ using namespace cv;
 string dir = "RhobanVisionLog/log2/";
 string ext = ".png";
 string prefix = "";
-int start = 0;
-int end = 341;
+int start = 3;
+int end = 50;
 int delay = 10000000;
 
 void fetchImages();
@@ -66,7 +66,7 @@ void process(Mat image) {
     PixelClassifier pc;
     pc.setImage(image);
 
-    //
+    // * * * * base image * * * * //
     imshow("Base image", image);
 
 
@@ -89,7 +89,10 @@ void process(Mat image) {
     }
 
     // * * * * GOAL * * * * //
-    //pc.detectGoal();
+    vector<Point> goal;
+    Point goalCenter;
+    pc.detectGoal(goal, goalCenter);
+
 
 }
 
