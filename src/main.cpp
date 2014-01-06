@@ -25,12 +25,16 @@ int main()
     imshow("Bonjour", image);
     pc.setImage(image);
 
+    pc.filterOutOfTerrain();
 
     Mat imageNew;
     pc.generateImageFromClass(imageNew);
-    namedWindow("new");
     imshow("new", imageNew);
-    pc.detectGoal();
+
+    //pc.detectGoal();
+
+    pc.detectBall();
+
     /*
     waitKey();
     pc.filterOutOfTerrain();

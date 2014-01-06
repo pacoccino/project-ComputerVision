@@ -28,6 +28,8 @@ public:
     void filterOutOfTerrain();
     void getOneClass(Mat &dest, PixelClass cl);
     void detectGoal();
+    void detectBall();
+    void extractBiggestConnectedComposant(Mat source, Mat dest);
 };
 
 #endif // PIXELCLASSIFIER_H

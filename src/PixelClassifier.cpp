@@ -113,6 +113,19 @@ void PixelClassifier::getOneClass(Mat &dest, PixelClass cl) {
 
 }
 
+
+// WARNING! Must filter terrain out
+void PixelClassifier::detectBall() {
+    Mat ballTresh;
+    getOneClass(ballTresh, BALLE);
+
+    erode(ballTresh, ballTresh, NULL);
+    dilate(ballTresh, ballTresh, NULL);
+
+    imshow("Ball", ballTresh);
+
+}
+
 void PixelClassifier::detectGoal() {
     Mat goalThresh;
     getOneClass(goalThresh, BUT);
@@ -159,6 +172,29 @@ void PixelClassifier::detectGoal() {
     waitKey();
 }
 
+void PixelClassifier::extractBiggestConnectedComposant(Mat source, Mat dest){
+    Mat img = source.clone();
+    //Mat out = source.clone();
+    std::vector<std::vector<cv::Point> > contours;
+    std::vector<cv::Vec4i> hierarchy;
+    cv::findContours( img, contours, hierarchy, cv::RETR_CCOMP, cv::CHAIN_APPROX_TC89_KCOS);
+    int id = -1;
+    float area = 0;
+    for ( size_t i=0; i < contours.size(); ++i )
+    {
+        float currentArea = contourArea(contours.at(i));
+        if (currentArea > area){
+            area = currentArea;
+            id = i;
+        }
+    }
+    if (id>=0){
+        dest.setTo(0);
+        drawContours(dest, contours, id, Scalar(255), CV_FILLED);
+    }
+    //dest = out.clone();
+}
+
 void PixelClassifier::filterOutOfTerrain() {
     Mat thresh(classMat.rows, classMat.cols, CV_8UC1);
 
@@ -171,52 +207,22 @@ void PixelClassifier::filterOutOfTerrain() {
         }
     }
 
-    namedWindow("coucoua");
-
     int an;
     Mat element;
 
-    an=5;
-    element = getStructuringElement(cv::MORPH_ELLIPSE, Size(an*2+1, an*2+1), Point(an, an) );
-    erode(thresh, thresh, element);
 
+    // Extraction de la composante connexe de surface la plus grande
+    extractBiggestConnectedComposant(thresh, thresh);
+
+    // dilatation
     an=5;
     element = getStructuringElement(cv::MORPH_ELLIPSE, Size(an*2+1, an*2+1), Point(an, an) );
     dilate(thresh, thresh, element);
 
-    imshow("coucoua", thresh);
-    waitKey();
-    Mat edges;
-    Canny(thresh, edges, 66.0, 133.0, 3);
-
-    dilate(edges, edges, Mat(), Point(-1,-1));
-    namedWindow("coucou");
-    imshow("coucou", edges);
-
-    vector<Vec2f> lines;
-    HoughLines( edges, lines, 1, CV_PI/180, 50, 0, 0 );
-    cout << lines.size() << endl;
-
-    Mat lignes(classMat.rows, classMat.cols, CV_8UC3);
-    for( size_t i = 0; i < lines.size(); i++ )
-    {
-         float rho = lines[i][0], theta = lines[i][1];
-         Point pt1, pt2;
-         double a = cos(theta), b = sin(theta);
-         double x0 = a*rho, y0 = b*rho;
-         pt1.x = cvRound(x0 + 1000*(-b));
-         pt1.y = cvRound(y0 + 1000*(a));
-         pt2.x = cvRound(x0 - 1000*(-b));
-         pt2.y = cvRound(y0 - 1000*(a));
-         line( lignes, pt1, pt2, Scalar(0,0,255), 1, CV_AA);
-    }
-
-    namedWindow("lignes");
-    imshow("lignes", lignes);
-
+    // filtrage
     for(int x=0; x<thresh.cols; x++) {
         for(int y=0; y<thresh.rows; y++) {
-            if(thresh.at<uchar>(y,x) == 0 && classMat.at<uchar>(y,x) != BUT)
+            if(thresh.at<uchar>(y,x) == 0 || classMat.at<uchar>(y,x) == BUT)
                 classMat.at<uchar>(y,x) = POUBELLE;
         }
     }
