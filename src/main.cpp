@@ -67,8 +67,9 @@ void process(Mat image) {
     PixelClassifier pc;
     Mat imageNew;
     pc.setImage(image);
-
-    pc.detectGoal();
+    vector<Point> goal;
+    Point goalCenter;
+    pc.detectGoal(goal, goalCenter);
     pc.detectBall();
 
     pc.generateImageFromClass(imageNew);

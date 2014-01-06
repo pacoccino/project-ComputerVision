@@ -182,7 +182,7 @@ bool PixelClassifier::detectGoal(vector<Point> &goalCorners, Point &center) {
 
 
         Moments mom = moments(points);
-        center = Point(mom.m10/mom.m00, mom.m01/mom/m00);
+        center = Point(mom.m10/mom.m00, mom.m01/mom.m00);
 
         int election;
 
