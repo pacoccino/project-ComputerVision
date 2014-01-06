@@ -15,7 +15,7 @@ string ext = ".png";
 string prefix = "";
 int start = 3;
 int end = 50;
-int delay = 10000000;
+int delay = 1000;
 
 KalmanFilter KF(4, 2);
 Point2f prevCenter(-1,-1);
