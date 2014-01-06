@@ -114,9 +114,7 @@ void process(Mat image) {
         cout << "[GOAL] Detected at " << goalCenter << endl;
         show("Goal", goalOut, offset);
     } else {
-        destroyWindow("Goal");
-    }
-    else {
         cout << "Goal not detected";
+        destroyWindow("Goal");
     }
 }
