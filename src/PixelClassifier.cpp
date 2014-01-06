@@ -147,68 +147,57 @@ void PixelClassifier::detectBall() {
 
 }
 
-void PixelClassifier::detectGoal() {
+bool PixelClassifier::detectGoal(vector<Point> &goalCorners, Point &center) {
     Mat goalThresh;
     getOneClass(goalThresh, BUT);
 
     int an;
     Mat element;
-
     an=2;
     element = getStructuringElement(cv::MORPH_ELLIPSE, Size(an*2+1, an*2+1), Point(an, an) );
     erode(goalThresh, goalThresh, element);
-
-    an=3;
+    an=4;
     element = getStructuringElement(cv::MORPH_ELLIPSE, Size(an*2+1, an*2+1), Point(an, an) );
     dilate(goalThresh, goalThresh, element);
 
-
-    Mat edges,lignes;
+    Mat edges;
     Canny(goalThresh, edges, 66.0, 133.0, 3);
 
-    namedWindow("Goal");
-    imshow("Goal", edges);
-
     vector<Vec4i> lines;
-    HoughLinesP(goalThresh, lines, 1, CV_PI/180, 40, 70, 10 );
+    HoughLinesP(goalThresh, lines, 1, CV_PI/180, 40, 30, 10 );
 
-    cout << "Nombre de lognes : " << lines.size() << endl;
-    lignes.create(classMat.rows, classMat.cols, CV_8UC3);
-    lignes.setTo(Scalar(0,0,0));
-    vector<Point> points;
-    for( size_t i = 0; i < lines.size(); i++ )
-    {
-        Vec4i l = lines[i];
-        //line( lignes, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(0,0,255), 3, CV_AA);
-        Point p;
-        p.x = l[0];
-        p.y = l[1];
-        points.push_back(p);
+    if(lines.size()>2) {
+        vector<Point> points;
+        for( size_t i = 0; i < lines.size(); i++ )
+        {
+            Vec4i l = lines[i];
+            Point p;
+            p.x = l[0];
+            p.y = l[1];
+            points.push_back(p);
+            p.x = l[2];
+            p.y= l[3];
+            points.push_back(p);
+        }
 
-        p.x = l[2];
-        p.y= l[3];
-        points.push_back(p);
+
+        Moments mom = moments(points);
+        center = Point(mom.m10/mom.m00, mom.m01/mom/m00);
+
+        int election;
+
+        election = Tools::getNearestPoint(points, Point(0,classMat.rows));
+        goalCorners.push_back(points[election]);
+        election = Tools::getNearestPoint(points, Point(0,0));
+        goalCorners.push_back(points[election]);
+        election = Tools::getNearestPoint(points, Point(classMat.cols,0));
+        goalCorners.push_back(points[election]);
+        election = Tools::getNearestPoint(points, Point(classMat.cols,classMat.rows));
+        goalCorners.push_back(points[election]);
+        return true;
     }
+    return false;
 
-    for( size_t i = 0; i < points.size(); i++ )
-    {
-        circle(lignes, points[i], 2, Scalar(255,0,0), 2);
-    }
-
-    int election;
-    election = Tools::getNearerPoint(points, Point(0,0));
-    circle(lignes, points[election], 2, Scalar(0,0,255), 2);
-    election = Tools::getNearerPoint(points, Point(classMat.cols,0));
-    circle(lignes, points[election], 2, Scalar(0,0,255), 2);
-    election = Tools::getNearerPoint(points, Point(0,classMat.rows));
-    circle(lignes, points[election], 2, Scalar(0,0,255), 2);
-    election = Tools::getNearerPoint(points, Point(classMat.cols,classMat.rows));
-    circle(lignes, points[election], 2, Scalar(0,0,255), 2);
-
-    namedWindow("lignes");
-    imshow("lignes", lignes);
-
-    waitKey();
 }
 
 std::vector< cv::Point > *PixelClassifier::extractBiggestConnectedComposant(Mat source, Mat dest){

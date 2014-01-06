@@ -10,10 +10,11 @@ float Tools::distance(Point p1, Point p2) {
     return dist;
 }
 
-int Tools::getNearerPoint(vector<Point> list, Point p) {
+int Tools::getNearestPoint(vector<Point> list, Point p) {
 
     float dist, maxDist = 100000;
-    int election = -1;
+    int election = 0;
+
 
     for( size_t i = 0; i < list.size(); i++ )
     {

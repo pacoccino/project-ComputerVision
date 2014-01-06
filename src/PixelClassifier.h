@@ -32,7 +32,7 @@ public:
     void getOneClass(Mat &dest, PixelClass cl);
 
     void filterOutOfTerrain();
-    void detectGoal();
+    bool detectGoal();
     void detectBall();
     std::vector<cv::Point> *extractBiggestConnectedComposant(Mat source, Mat dest);
 };

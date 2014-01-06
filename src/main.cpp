@@ -12,8 +12,8 @@ using namespace cv;
 string dir = "RhobanVisionLog/log8/";
 string ext = ".png";
 string prefix = "";
-int start = 0;
-int end = 341;
+int start = 3;
+int end = 50;
 int delay = 10000000;
 
 void fetchImages();
