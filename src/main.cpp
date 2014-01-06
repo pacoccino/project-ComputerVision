@@ -69,8 +69,9 @@ void process(Mat image) {
     pc.setImage(image);
     vector<Point> goal;
     Point goalCenter;
-    pc.detectGoal(goal, goalCenter);
-    pc.detectBall();
+    /*pc.detectGoal(goal, goalCenter);
+    pc.detectBall();*/
+    pc.filterOutOfTerrain();
 
     pc.generateImageFromClass(imageNew);
 
