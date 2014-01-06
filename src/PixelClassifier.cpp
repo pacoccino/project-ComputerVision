@@ -119,6 +119,7 @@ void PixelClassifier::detectBall() {
     Mat ballTresh;
     getOneClass(ballTresh, BALLE);
 
+    Mat out = sourceImage.clone();
 
     vector< Point > *contour;
     contour = extractBiggestConnectedComposant(ballTresh, ballTresh);
@@ -130,15 +131,19 @@ void PixelClassifier::detectBall() {
 
         approxPolyDP( Mat(*contour), poly, 3, true );
         minEnclosingCircle( (Mat)poly, center, radius);
-        circle(ballTresh, center, (int)radius,Scalar(255,0,0) , 2, 8, 0 );
+        circle(ballTresh, center, (int)radius,Scalar(255,255,255) , 2, 8, 0 );
+
+
+        circle(out, center, (int)radius * 3,Scalar(0,0,255) , 2, 8, 0 );
 
         cout << "Ball at " << center << " of radius " << radius << "\n";
     }else{
         cout << "Ball not detected\n";
-        //TODO
     }
 
-    imshow("Ball", ballTresh);
+
+
+    imshow("Ball", out);
 
 }
 
@@ -205,8 +210,8 @@ std::vector< cv::Point > *PixelClassifier::extractBiggestConnectedComposant(Mat 
         }
     }
 
+    dest.setTo(0);
     if (id>=0){
-        dest.setTo(0);
         drawContours(dest, contours, id, Scalar(255), CV_FILLED);
 
         vector< Point > *out = new vector< Point >();
