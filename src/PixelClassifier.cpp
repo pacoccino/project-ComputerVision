@@ -13,6 +13,36 @@ void PixelClassifier::setImage(const Mat &image) {
     computeMatrix();
 }
 
+void PixelClassifier::computeMatrix() {
+    // generate a class matrix from HSV matrix
+    if(sourceImage.data == NULL)
+        return;
+
+    classMat.create(sourceImage.rows, sourceImage.cols, CV_8UC1);
+
+    uchar hue, saturation, value;
+
+    for(int x=0; x<sourceImage.cols; x++) {
+        for(int y=0; y<sourceImage.rows; y++) {
+            hue = sourceImage.at<Vec3b>(y,x)[0];
+            saturation = sourceImage.at<Vec3b>(y,x)[1];
+            value = sourceImage.at<Vec3b>(y,x)[2];
+            classMat.at<char>(y,x) = (char)getClass(hue, saturation, value);
+        }
+    }
+}
+
+void PixelClassifier::generateImageFromClass(Mat &dest) {
+    // generate an image from class matrix
+    dest.create(classMat.rows, classMat.cols, CV_8UC3);
+
+    for(int x=0; x<dest.cols; x++) {
+        for(int y=0; y<dest.rows; y++) {
+            setColorFromClass(dest.at<Vec3b>(y,x), classMat.at<char>(y,x));
+        }
+    }
+}
+
 bool PixelClassifier::isInRange(char source, char dest, char range) {
     // tells if a value is around another value
     int largeSource = source;
@@ -33,28 +63,9 @@ PixelClass PixelClassifier::getClass(uchar hue, uchar saturation, uchar value) {
         return BUT;
     if(isInRange(hue, 60) && saturation > 100 && value > 100) // vert
         return TERRAIN;
-    if(saturation < 60 &&  value > 150) // Blanc
+    if(value > 150) // Blanc
         return LIGNE;
     return POUBELLE;
-}
-
-void PixelClassifier::computeMatrix() {
-    // generate a class matrix from HSV matrix
-    if(sourceImage.data == NULL)
-        return;
-
-    classMat.create(sourceImage.rows, sourceImage.cols, CV_8UC1);
-
-    uchar hue, saturation, value;
-
-    for(int x=0; x<sourceImage.cols; x++) {
-        for(int y=0; y<sourceImage.rows; y++) {
-            hue = sourceImage.at<Vec3b>(y,x)[0];
-            saturation = sourceImage.at<Vec3b>(y,x)[1];
-            value = sourceImage.at<Vec3b>(y,x)[2];
-            classMat.at<char>(y,x) = (char)getClass(hue, saturation, value);
-        }
-    }
 }
 
 void PixelClassifier::setColorFromClass(Vec3b &dest, char src) {
@@ -84,17 +95,6 @@ void PixelClassifier::setColorFromClass(Vec3b &dest, char src) {
         dest[1] = 0;
         dest[2] = 0;
         break;
-    }
-}
-
-void PixelClassifier::generateImageFromClass(Mat &dest) {
-    // generate an image from class matrix
-    dest.create(classMat.rows, classMat.cols, CV_8UC3);
-
-    for(int x=0; x<dest.cols; x++) {
-        for(int y=0; y<dest.rows; y++) {
-            setColorFromClass(dest.at<Vec3b>(y,x), classMat.at<char>(y,x));
-        }
     }
 }
 
@@ -194,11 +194,11 @@ void PixelClassifier::detectGoal() {
 }
 
 std::vector< cv::Point > *PixelClassifier::extractBiggestConnectedComposant(Mat source, Mat dest){
-    Mat img = source.clone();
+    //Mat img = source.clone();
     //Mat out = source.clone();
     std::vector<std::vector<cv::Point> > contours;
     std::vector<cv::Vec4i> hierarchy;
-    cv::findContours( img, contours, hierarchy, cv::RETR_CCOMP, cv::CHAIN_APPROX_TC89_KCOS);
+    cv::findContours(source, contours, hierarchy, cv::RETR_CCOMP, cv::CHAIN_APPROX_TC89_KCOS);
     int id = -1;
     float area = 0;
     for ( size_t i=0; i < contours.size(); ++i )
@@ -223,28 +223,39 @@ std::vector< cv::Point > *PixelClassifier::extractBiggestConnectedComposant(Mat 
 }
 
 void PixelClassifier::filterOutOfTerrain() {
-    Mat thresh(classMat.rows, classMat.cols, CV_8UC1);
+    Mat thresh;
+    thresh.create(classMat.rows, classMat.cols, CV_8UC1);
 
     for(int x=0; x<thresh.cols; x++) {
         for(int y=0; y<thresh.rows; y++) {
-            if(classMat.at<uchar>(y,x) ==  TERRAIN || classMat.at<uchar>(y,x) == BALLE || classMat.at<uchar>(y,x) == LIGNE)
+            if(classMat.at<uchar>(y,x) == TERRAIN || classMat.at<uchar>(y,x) == BALLE || classMat.at<uchar>(y,x) == LIGNE)
                 thresh.at<uchar>(y,x) = 255;
             else
                 thresh.at<uchar>(y,x) = 0;
         }
     }
 
+    imshow("Before filter", thresh);
+
     int an;
     Mat element;
 
+    // erode
+    an=2;
+    element = getStructuringElement(cv::MORPH_ELLIPSE, Size(an*2+1, an*2+1), Point(an, an) );
+    erode(thresh, thresh, element);
+    imshow("After erode", thresh);
 
     // Extraction de la composante connexe de surface la plus grande
     extractBiggestConnectedComposant(thresh, thresh);
+    imshow("After Connected Composant", thresh);
 
-    // dilatation
+    // dilate
     an=5;
     element = getStructuringElement(cv::MORPH_ELLIPSE, Size(an*2+1, an*2+1), Point(an, an) );
     dilate(thresh, thresh, element);
+    imshow("After dilatation", thresh);
+
 
     // filtrage
     for(int x=0; x<thresh.cols; x++) {
@@ -253,6 +264,4 @@ void PixelClassifier::filterOutOfTerrain() {
                 classMat.at<uchar>(y,x) = POUBELLE;
         }
     }
-
-
 }

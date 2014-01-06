@@ -9,12 +9,12 @@
 using namespace std;
 using namespace cv;
 
-string dir = "RhobanVisionLog/log2/";
+string dir = "RhobanVisionLog/log8/";
 string ext = ".png";
 string prefix = "";
 int start = 0;
-int end = 100;
-int delay = 1000;
+int end = 341;
+int delay = 10000000;
 
 int main() {
     struct timeval startTime, endTime;
@@ -24,6 +24,7 @@ int main() {
         ss << dir << prefix << i << ext;
         string file = ss.str();
 
+        // Init
         gettimeofday(&startTime, NULL);
 
         Mat image;
@@ -34,23 +35,27 @@ int main() {
         }
         imshow("Base image", image);
 
+        // Processing
         PixelClassifier pc;
         Mat imageNew;
         pc.setImage(image);
+        pc.filterOutOfTerrain();
+        //pc.detectBall();
+
         pc.generateImageFromClass(imageNew);
 
-        pc.filterOutOfTerrain();
-        pc.detectBall();
-
+        // Result
         gettimeofday(&endTime, NULL);
-
         cout << "Proccessing time for " << prefix << i << ext << " : "
-             << (endTime.tv_sec - startTime.tv_sec) * 1000 + (endTime.tv_usec - startTime.tv_usec) / 1000
+             << (endTime.tv_sec - startTime.tv_sec) * 1000 +
+                (endTime.tv_usec - startTime.tv_usec) / 1000
              << " ms" << endl;
 
-//        imshow("Result Image", imageNew);
-        waitKey(delay);
+        imshow("Result Image", imageNew);
 
+        if (waitKey(delay) == 27) { // == ESC
+            break;
+        }
     }
 
     return 0;
