@@ -98,12 +98,73 @@ void PixelClassifier::generateImageFromClass(Mat &dest) {
     }
 }
 
+void PixelClassifier::getOneClass(Mat &dest, PixelClass cl) {
+    dest.create(classMat.rows, classMat.cols, CV_8UC1);
+
+
+    for(int x=0; x<dest.cols; x++) {
+        for(int y=0; y<dest.rows; y++) {
+            if(classMat.at<uchar>(y,x) == cl)
+                dest.at<uchar>(y,x) = 255;
+            else
+                dest.at<uchar>(y,x) = 0;
+        }
+    }
+
+}
+
+void PixelClassifier::detectGoal() {
+    Mat goalThresh;
+    getOneClass(goalThresh, BUT);
+
+    int an;
+    Mat element;
+
+    an=2;
+    element = getStructuringElement(cv::MORPH_ELLIPSE, Size(an*2+1, an*2+1), Point(an, an) );
+    erode(goalThresh, goalThresh, element);
+
+    an=3;
+    element = getStructuringElement(cv::MORPH_ELLIPSE, Size(an*2+1, an*2+1), Point(an, an) );
+    dilate(goalThresh, goalThresh, element);
+
+    namedWindow("Goal");
+    imshow("Goal", goalThresh);
+
+
+    Mat edges;
+    Canny(goalThresh, edges, 66.0, 133.0, 3);
+
+    vector<Vec2f> lines;
+    HoughLines( edges, lines, 1, CV_PI/180, 50, 0, 0 );
+    cout << lines.size() << endl;
+
+    Mat lignes(classMat.rows, classMat.cols, CV_8UC3);
+    for( size_t i = 0; i < lines.size(); i++ )
+    {
+         float rho = lines[i][0], theta = lines[i][1];
+         Point pt1, pt2;
+         double a = cos(theta), b = sin(theta);
+         double x0 = a*rho, y0 = b*rho;
+         pt1.x = cvRound(x0 + 1000*(-b));
+         pt1.y = cvRound(y0 + 1000*(a));
+         pt2.x = cvRound(x0 - 1000*(-b));
+         pt2.y = cvRound(y0 - 1000*(a));
+         line( lignes, pt1, pt2, Scalar(0,0,255), 1, CV_AA);
+    }
+
+    namedWindow("lignes");
+    imshow("lignes", lignes);
+
+    waitKey();
+}
+
 void PixelClassifier::filterOutOfTerrain() {
     Mat thresh(classMat.rows, classMat.cols, CV_8UC1);
 
     for(int x=0; x<thresh.cols; x++) {
         for(int y=0; y<thresh.rows; y++) {
-            if(classMat.at<uchar>(y,x) ==  TERRAIN)
+            if(classMat.at<uchar>(y,x) ==  TERRAIN || classMat.at<uchar>(y,x) == BALLE || classMat.at<uchar>(y,x) == LIGNE)
                 thresh.at<uchar>(y,x) = 255;
             else
                 thresh.at<uchar>(y,x) = 0;
@@ -111,10 +172,20 @@ void PixelClassifier::filterOutOfTerrain() {
     }
 
     namedWindow("coucoua");
-    dilate(thresh, thresh, Mat(), Point(-1,-1), 2);
+
+    int an;
+    Mat element;
+
+    an=5;
+    element = getStructuringElement(cv::MORPH_ELLIPSE, Size(an*2+1, an*2+1), Point(an, an) );
+    erode(thresh, thresh, element);
+
+    an=5;
+    element = getStructuringElement(cv::MORPH_ELLIPSE, Size(an*2+1, an*2+1), Point(an, an) );
+    dilate(thresh, thresh, element);
 
     imshow("coucoua", thresh);
-
+    waitKey();
     Mat edges;
     Canny(thresh, edges, 66.0, 133.0, 3);
 
@@ -142,13 +213,13 @@ void PixelClassifier::filterOutOfTerrain() {
 
     namedWindow("lignes");
     imshow("lignes", lignes);
-/*
+
     for(int x=0; x<thresh.cols; x++) {
         for(int y=0; y<thresh.rows; y++) {
             if(thresh.at<uchar>(y,x) == 0 && classMat.at<uchar>(y,x) != BUT)
                 classMat.at<uchar>(y,x) = POUBELLE;
         }
     }
-*/
+
 
 }

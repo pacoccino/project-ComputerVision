@@ -30,10 +30,12 @@ int main()
     pc.generateImageFromClass(imageNew);
     namedWindow("new");
     imshow("new", imageNew);
+    pc.detectGoal();
+    /*
     waitKey();
     pc.filterOutOfTerrain();
     pc.generateImageFromClass(imageNew);
-    imshow("new", imageNew);
+    imshow("new", imageNew);*/
     waitKey();
     return 0;
 }

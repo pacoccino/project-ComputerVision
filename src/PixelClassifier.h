@@ -26,6 +26,8 @@ public:
     void setImage(const Mat &image);
     void generateImageFromClass(Mat &dest);
     void filterOutOfTerrain();
+    void getOneClass(Mat &dest, PixelClass cl);
+    void detectGoal();
 };
 
 #endif // PIXELCLASSIFIER_H
