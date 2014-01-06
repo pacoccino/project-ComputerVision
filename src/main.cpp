@@ -68,19 +68,27 @@ void fetchImages() {
     }
 }
 
+void show(const char *str, Mat image, int &offset){
+    namedWindow(str);
+    cvMoveWindow(str, offset, 0);
+    offset += image.cols ;
+    imshow(str, image);
+}
+
 void process(Mat image) {
     PixelClassifier pc;
     pc.setImage(image);
 
-    // * * * * base image * * * * //
-    imshow("Base image", image);
+    int offset = 0;
 
+    // * * * * base image * * * * //
+    show("Base image", image, offset);
 
     // * * * * Filter Terrain * * * * //
     pc.filterOutOfTerrain();
     Mat imageOut;
     pc.generateImageFromClass(imageOut);
-    imshow("Filtered Terrain", imageOut);
+    show("Filtered Terrain", imageOut, offset);
 
     // * * * * BALL * * * * //
     Mat ballOut = image.clone();
@@ -89,7 +97,7 @@ void process(Mat image) {
     if (isBallVisible){
         cout << "[BALL] Detected at " << center << " of radius " << radius << endl;
         circle(ballOut, center, (int)radius * 3,Scalar(0,0,255) , 2, 8, 0 );
-        imshow ("ball", ballOut);
+        show ("ball", ballOut, offset);
     }else{
         cout << "[BALL] Not detected" << endl;
     }
@@ -97,10 +105,12 @@ void process(Mat image) {
     // * * * * GOAL * * * * //
     vector<Point> goal;
     Point goalCenter;
-    pc.detectGoal(goal, goalCenter);
-
-
-
+    bool isGoalVisible = pc.detectGoal(goal, goalCenter);
+    Mat goalOut = image.clone();
+    if (isGoalVisible){
+        circle(goalOut, goalCenter, 10, Scalar(255,0,0), 10);
+        show("Goal", goalOut, offset);
+    }
 }
 
 int test() {
