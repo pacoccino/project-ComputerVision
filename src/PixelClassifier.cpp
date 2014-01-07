@@ -296,11 +296,10 @@ void PixelClassifier::positionFromGoal(vector<Point> goal) {
     rightHeight = Tools::distance(goal[2], goal[3]);
 
     float ecart = abs(leftHeight - rightHeight);
-    cout << ecart << endl;
     if(leftHeight < rightHeight && ecart > 5) {
-        cout << "Robot is in the right part of the terrain" << endl;
+        cout << "       Robot is in the right part of the terrain" << endl;
     }
     else {
-        cout << "Robot is in the left part of the terrain" << endl;
+        cout << "       Robot is in the left part of the terrain" << endl;
     }
 }

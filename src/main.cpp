@@ -1,4 +1,5 @@
 #include <iostream>
+#include <stdlib.h>
 #include <sys/time.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -25,7 +26,24 @@ void KalmanInterpolation(Point2f center, bool isBallVisible, Mat out);
 void fetchImages();
 void process(Mat);
 
-int main() {
+int main(int argc, char **argv) {
+
+    if (argc < 4 || argc > 7){
+        cout << "Usage: ComputerVision <image directory> <start image> <end image>" << endl
+             << "                     [<image prefix> <image extension> <delay (ms)>]"
+             << endl;
+        return 0;
+    }
+
+    dir = argv[1];
+    start = atoi(argv[2]);
+    end = atoi(argv[3]);
+    if (argc >= 5)
+        prefix = argv[4];
+    if (argc >= 6)
+        ext = argv[5];
+    if (argc >= 7)
+        delay = atoi(argv[6]);
 
     initKalmanInterpolation();
 
@@ -35,6 +53,7 @@ int main() {
     return 0;
 }
 
+// Initialise the Kalman filter
 void initKalmanInterpolation(){
 
     // * * * * video tracking * * * * //
@@ -47,6 +66,7 @@ void initKalmanInterpolation(){
     KF.transitionMatrix.at<float>(1,3) = 1;
 }
 
+// Kalman Interpolation of the ball center
 void KalmanInterpolation(Point2f center, bool isBallVisible, Mat out){
     if (prevCenter.x < 0){
         if (isBallVisible){
@@ -88,6 +108,7 @@ void KalmanInterpolation(Point2f center, bool isBallVisible, Mat out){
     }
 }
 
+// process all images
 void fetchImages() {
 
     struct timeval startTime, endTime;
@@ -99,6 +120,8 @@ void fetchImages() {
 
         // Init
         gettimeofday(&startTime, NULL);
+
+        cout << ">> Processing image " << prefix << i << ext << "..." << endl;
 
         Mat image;
         image = imread(file);
@@ -112,10 +135,10 @@ void fetchImages() {
 
         // Result
         gettimeofday(&endTime, NULL);
-        cout << "Proccessing time for " << prefix << i << ext << " : "
+        cout << "(Elapsed time for " << prefix << i << ext << " : "
              << (endTime.tv_sec - startTime.tv_sec) * 1000 +
                 (endTime.tv_usec - startTime.tv_usec) / 1000
-             << " ms" << endl;
+             << " ms)" << endl << endl;
 
         char k = (unsigned int)cvWaitKey(delay);
         if (k == 27) { // == ESC
@@ -130,6 +153,7 @@ void fetchImages() {
     }
 }
 
+// Display image in a window at the right of the previous windows
 void show(const char *str, Mat image, int &offset){
     namedWindow(str);
     cvMoveWindow(str, offset, 0);
@@ -137,6 +161,7 @@ void show(const char *str, Mat image, int &offset){
     imshow(str, image);
 }
 
+// process the current image
 void process(Mat image) {
     PixelClassifier pc;
     pc.setImage(image);
@@ -182,7 +207,7 @@ void process(Mat image) {
         pc.positionFromGoal(goal);
     }
     else {
-        cout << "Goal not detected" << endl;
+        cout << "[GOAL] Not detected" << endl;
     }
 
     // output image
