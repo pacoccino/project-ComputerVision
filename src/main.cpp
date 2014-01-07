@@ -29,8 +29,8 @@ void process(Mat);
 int main(int argc, char **argv) {
 
     if (argc < 4 || argc > 7){
-        cout << "Usage: ComputerVision <image directory> "
-             << "<start image> <end image> [<image prefix> <image extension> <delay (ms)>]"
+        cout << "Usage: ComputerVision <image directory> <start image> <end image>" << endl
+             << "                     [<image prefix> <image extension> <delay (ms)>]"
              << endl;
         return 0;
     }
