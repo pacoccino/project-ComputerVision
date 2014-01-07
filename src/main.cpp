@@ -188,7 +188,6 @@ void process(Mat image) {
         circle(out, center, (int)radius * 3,Scalar(0,0,255) , 4, 8, 0 );
     }else{
         cout << "[BALL] Not detected" << endl;
-        destroyWindow("ball");
     }
 
     // Video Tracking
@@ -202,8 +201,6 @@ void process(Mat image) {
     if(pc.detectGoal(goal, goalCenter)) {
         circle(out, goalCenter, 10,Scalar(255,0,0) , 20, 8, 0 );
         cout << "[GOAL] Detected at " << goalCenter << endl;
-        show("Goal", out, offset);
-
         pc.positionFromGoal(goal);
     }
     else {

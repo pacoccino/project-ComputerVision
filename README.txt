@@ -45,6 +45,12 @@
  
  <delay (ms)>       Durée entre deux images
 
+
+ Le programme traite l'ensemble des images
+ fournies et affiche la position de la balle
+ detectée en rouge, la position supposée
+ en vert, et la position du goal en bleu.
+
  
  Exemples
 -------------------------------------------------
