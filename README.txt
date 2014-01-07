@@ -19,6 +19,11 @@
  
 	make
 
+ Si nécessaire, il est possible de regénerer le
+ Makefile avec qmake :
+
+ 	qmake ComputerVision.pro
+
 
  Execution
 -------------------------------------------------
