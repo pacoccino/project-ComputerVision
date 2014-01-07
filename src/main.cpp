@@ -13,8 +13,8 @@ using namespace cv;
 string dir = "RhobanVisionLog/log2/";
 string ext = ".png";
 string prefix = "";
-int start = 3;
-int end = 50;
+int start = 100;
+int end = 150;
 int delay = 1000;
 
 KalmanFilter KF(4, 2);
@@ -60,7 +60,7 @@ void KalmanInterpolation(Point2f center, bool isBallVisible, Mat out){
             prevCenter = center;
         }
     }else{
-        setIdentity(KF.measurementNoiseCov, Scalar::all(10));
+        setIdentity(KF.measurementNoiseCov, Scalar::all(100));
 
         Mat prediction;
         prediction = KF.predict();

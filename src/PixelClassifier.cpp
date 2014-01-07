@@ -28,7 +28,16 @@ void PixelClassifier::setImage(const Mat &image) {
 }
 
 void PixelClassifier::preprocess() {
+    imshow("Before preprocess", sourceImage);
 
+    Mat preProcessed;
+    Size blurSize(5,5);
+
+    GaussianBlur(sourceImage, preProcessed, blurSize, 0);
+    imshow("After preprocess", preProcessed);
+    //waitKey();
+
+    sourceImage = preProcessed;
 }
 
 void PixelClassifier::computeMatrix() {
